@@ -40,7 +40,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.accompanist.flowlayout)
+    implementation("com.google.accompanist:accompanist-flowlayout:0.30.1")
     implementation(libs.androidx.material)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
