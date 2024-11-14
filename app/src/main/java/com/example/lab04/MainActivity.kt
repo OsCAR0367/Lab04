@@ -119,7 +119,12 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
     }
 
     Column(modifier = modifier) {
-        Text(text = "Hello $name!")
+        Text(
+            text = "Hello $name!",
+            style = MaterialTheme.typography.h4, // Modified style
+            color = MaterialTheme.colorScheme.primary, // Modified color
+            modifier = Modifier.padding(16.dp) // Modified padding
+        )
         Divider(modifier = Modifier.padding(vertical = 8.dp))
         Button(onClick = { showDialog = true }) {
             Text("Show Dialog")
@@ -196,7 +201,6 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
         }
     }
 }
-
 @Composable
 fun CustomTooltip(
     tooltipText: String,
