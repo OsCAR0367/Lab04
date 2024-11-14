@@ -1,44 +1,40 @@
 package com.example.lab04
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.*
 import androidx.compose.material3.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import com.example.lab04.ui.theme.Lab04Theme
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
+import com.google.accompanist.pager.rememberPagerState
 
 class MainActivity : ComponentActivity() {
-    @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             Lab04Theme {
                 Surface(color = MaterialTheme.colorScheme.background) {
                     Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = { Text("Mi Top App Bar") },
-                                actions = {
-                                    IconButton(onClick = { /* Do something */ }) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_sample_image),
-                                            contentDescription = "Sample Icon"
-                                        )
-                                    }
-                                }
-                            )
+                        bottomBar = {
+                            BottomNavigationBar()
+                        },
+                        content = { innerPadding ->
+                            Row(modifier = Modifier.padding(innerPadding)) {
+                                NavigationRailBar()
+                                Greeting("Android", modifier = Modifier.padding(16.dp))
+                            }
                         }
-                    ) {
-                        CardExample()
-                    }
+                    )
                 }
             }
         }
@@ -46,125 +42,181 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun CardExample() {
+fun BottomNavigationBar() {
+    var selectedItem by remember { mutableStateOf(0) }
+    val items = listOf("Home", "Search", "Profile")
+
+    NavigationBar {
+        items.forEachIndexed { index, item ->
+            NavigationBarItem(
+                icon = { Icon(Icons.Default.Home, contentDescription = item) },
+                label = { Text(item) },
+                selected = selectedItem == index,
+                onClick = { selectedItem = index }
+            )
+        }
+    }
+}
+
+@Composable
+fun NavigationRailBar() {
+    var selectedItem by remember { mutableStateOf(0) }
+    val items = listOf("Home", "Search", "Profile")
+    val icons = listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.Person)
+
+    NavigationRail {
+        items.forEachIndexed { index, item ->
+            NavigationRailItem(
+                icon = { Icon(icons[index], contentDescription = item) },
+                label = { Text(item) },
+                selected = selectedItem == index,
+                onClick = { selectedItem = index }
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalPagerApi::class)
+@Composable
+fun Greeting(name: String, modifier: Modifier = Modifier) {
     var showDialog by remember { mutableStateOf(false) }
-    var checked by remember { mutableStateOf(false) }
-    var isLoading by remember { mutableStateOf(true) }
-    var selectedOption by remember { mutableStateOf("Option 1") }
-    var sliderPosition by remember { mutableStateOf(0f) }
-    var switchState by remember { mutableStateOf(false) }
+    var expanded by remember { mutableStateOf(false) }
+    val items = listOf("Option 1", "Option 2", "Option 3")
+    var selectedItem by remember { mutableStateOf(items[0]) }
+    var text by remember { mutableStateOf("") }
+    val pagerState = rememberPagerState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    var showSnackbar by remember { mutableStateOf(false) }
+    var selectedTabIndex by remember { mutableStateOf(0) }
+    val tabTitles = listOf("Tab 1", "Tab 2", "Tab 3")
 
     if (showDialog) {
-        AlertDialog(
-            onDismissRequest = { showDialog = false },
-            title = { Text(text = "Alert Dialog Title") },
-            text = { Text("This is an example of an AlertDialog in Jetpack Compose.") },
-            confirmButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-
-    Box(modifier = Modifier.fillMaxSize()) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp)
-        ) {
-            Column(
-                modifier = Modifier.padding(16.dp)
+        Dialog(onDismissRequest = { showDialog = false }) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 8.dp
             ) {
-                Text(text = "Card Title", style = MaterialTheme.typography.headlineSmall)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(text = "This is an example of a card in Jetpack Compose.")
-                Spacer(modifier = Modifier.height(16.dp))
-                Image(
-                    painter = painterResource(id = R.drawable.ic_sample_image),
-                    contentDescription = "Sample Image",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(200.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = checked,
-                        onCheckedChange = { checked = it }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Check me")
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(text = "Dialog Title")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(text = "This is an example of a custom Dialog in Jetpack Compose.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.End,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("Cancel")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                        TextButton(onClick = { showDialog = false }) {
+                            Text("OK")
+                        }
+                    }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = selectedOption == "Option 1",
-                        onClick = { selectedOption = "Option 1" }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Option 1")
-                }
-                Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = selectedOption == "Option 2",
-                        onClick = { selectedOption = "Option 2" }
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = "Option 2")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(text = "Slider Value: ${sliderPosition.toInt()}")
-                Slider(
-                    value = sliderPosition,
-                    onValueChange = { sliderPosition = it },
-                    valueRange = 0f..100f,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                Row(
-                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
-                ) {
-                    Text(text = "Switch")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Switch(
-                        checked = switchState,
-                        onCheckedChange = { switchState = it }
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Button(onClick = { showDialog = true }) {
-                    Text("Show AlertDialog")
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                if (isLoading) {
-                    CircularProgressIndicator()
-                }
-                Spacer(modifier = Modifier.height(16.dp))
             }
         }
-        FloatingActionButton(
-            onClick = { showDialog = true },
-            modifier = Modifier
-                .align(androidx.compose.ui.Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_fab_icon),
-                contentDescription = "FAB Icon"
-            )
+    }
+
+    Column(modifier = modifier) {
+        Text(text = "Hello $name!")
+        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        Button(onClick = { showDialog = true }) {
+            Text("Show Dialog")
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Box {
+            Button(onClick = { expanded = true }) {
+                Text(selectedItem)
+            }
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                items.forEach { item ->
+                    DropdownMenuItem(
+                        text = { Text(text = item) },
+                        onClick = {
+                            selectedItem = item
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedTextField(
+            value = text,
+            onValueChange = { text = it },
+            label = { Text("Enter text") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Button(onClick = { showSnackbar = true }) {
+            Text("Show Snackbar")
+        }
+        if (showSnackbar) {
+            LaunchedEffect(snackbarHostState) {
+                snackbarHostState.showSnackbar("This is a Snackbar")
+                showSnackbar = false
+            }
+        }
+        SnackbarHost(hostState = snackbarHostState)
+        Spacer(modifier = Modifier.height(16.dp))
+        TabRow(selectedTabIndex = selectedTabIndex) {
+            tabTitles.forEachIndexed { index, title ->
+                CustomTooltip(
+                    tooltipText = "Tooltip for $title",
+                    content = {
+                        Tab(
+                            selected = selectedTabIndex == index,
+                            onClick = { selectedTabIndex = index },
+                            text = { Text(title) }
+                        )
+                    }
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        HorizontalPager(
+            count = 5,
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            Card(
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Page #$page",
+                    modifier = Modifier.padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomTooltip(
+    tooltipText: String,
+    content: @Composable () -> Unit
+) {
+    var isTooltipVisible by remember { mutableStateOf(false) }
+
+    Box {
+        content()
+        if (isTooltipVisible) {
+            Surface(
+                shape = MaterialTheme.shapes.medium,
+                tonalElevation = 4.dp,
+                modifier = Modifier.padding(8.dp)
+            ) {
+                Text(
+                    text = tooltipText,
+                    modifier = Modifier.padding(8.dp)
+                )
+            }
         }
     }
 }
@@ -173,6 +225,6 @@ fun CardExample() {
 @Composable
 fun DefaultPreview() {
     Lab04Theme {
-        CardExample()
+        Greeting("Android")
     }
 }
