@@ -64,18 +64,23 @@ fun NavigationRailBar() {
     val items = listOf("Home", "Search", "Profile")
     val icons = listOf(Icons.Default.Home, Icons.Default.Search, Icons.Default.Person)
 
-    NavigationRail {
+    NavigationRail(
+        modifier = Modifier.background(MaterialTheme.colorScheme.secondary) // Modified background color
+    ) {
         items.forEachIndexed { index, item ->
             NavigationRailItem(
                 icon = { Icon(icons[index], contentDescription = item) },
-                label = { Text(item) },
+                label = { Text(item, color = MaterialTheme.colorScheme.onSecondary) }, // Modified text color
                 selected = selectedItem == index,
-                onClick = { selectedItem = index }
+                onClick = { selectedItem = index },
+                colors = NavigationRailItemDefaults.colors(
+                    selectedIconColor = MaterialTheme.colorScheme.primary, // Modified selected icon color
+                    unselectedIconColor = MaterialTheme.colorScheme.onBackground // Modified unselected icon color
+                )
             )
         }
     }
 }
-
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun Greeting(name: String, modifier: Modifier = Modifier) {
